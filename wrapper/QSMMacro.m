@@ -59,7 +59,7 @@ if ~isempty(headerAndExtraData.magnitude)
 end
 if ~isempty(headerAndExtraData.initGuess)
     headerAndExtraData.initGuess = double(zeropad_odd_dimension(headerAndExtraData.initGuess,'pre'));
-end   
+end
 
 fprintf('Done!\n');
 
@@ -67,10 +67,10 @@ fprintf('Done!\n');
 switch reference_tissue
     case 'None'
         mask_ref = [];
-        
+
     case 'Brain mask'
         mask_ref = mask;
-        
+
     case 'CSF'
         if( isempty(headerAndExtraData.magnitude) && isempty(headerAndExtraData.availableFileList.magnitude))
             warning('Please specify a magnitude data (at least 3 echoes) if you want to use CSF as reference.');
@@ -84,7 +84,7 @@ switch reference_tissue
                 warning('No normalisation will be done on the susceptibility map in this instance.');
                 mask_ref = [];
                 clear magn
-                
+
             else
                 r2s         = arlo(headerAndExtraData.sepia_header.TE, magn);
                 clear magn
@@ -94,7 +94,7 @@ switch reference_tissue
             end
         end
 end
-    
+
 %% QSM algorithm
 disp('Computing QSM map...');
 disp(['The following QSM algorithm will be used: ' method]);
@@ -105,11 +105,13 @@ disp(['The following QSM algorithm will be used: ' method]);
 % 3. convert output unit to ppm
 for k = 1:length(wrapper_QSM_function)
     if strcmpi(method,methodQSMName{k})
+        disp(method);
+        disp(wrapper_QSM_function{k});
         chi = feval(wrapper_QSM_function{k},localField,mask,matrixSize_new,voxelSize,algorParam, headerAndExtraData);
     end
 end
 
-% remove zero padding 
+% remove zero padding
 chi = double(zeropad_odd_dimension(chi,'post',matrixSize));
 if ~isempty(mask_ref)
     mask_ref = double(zeropad_odd_dimension(mask_ref,'post',matrixSize));
@@ -120,7 +122,7 @@ mask_update = chi ~= 0;
 if ~isempty(mask_ref)
     if strcmpi(method,'MEDI')
         if ~algorParam.qsm.isLambdaCSF          % not MEDI+0, MEDI+0 needs no referencing
-            chi(mask_update) = chi(mask_update) - mean(chi(mask_ref>0)); 
+            chi(mask_update) = chi(mask_update) - mean(chi(mask_ref>0));
         else
             warning('MEDI+0 already uses CSF as reference region in optimisation. No referencing is performed.');
             mask_ref = [];
