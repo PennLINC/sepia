@@ -1,9 +1,8 @@
 % Add general Path
-addpath(genpath("/cbica/projects/nibs/software/sepia-1.2.2.6/"));
+addpath(genpath("/cbica/projects/pafin/projects/qsm-validation/software/sepia/"));
 sepia_addpath;
 
 % Define paths
-base_path = '/cbica/projects/nibs/';
 output_dir = '{{ output_dir }}';
 % Concatenated phase image
 input(1).name = '{{ phase_file }}';

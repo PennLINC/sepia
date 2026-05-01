@@ -4,7 +4,7 @@
 % The specificed path must contain the following directories as original one:
 % MEDI toolbox  - functions/
 % STI Suite     - Core_Functions_P/
-% 
+%
 %
 % Kwok-shing Chan @ DCCN
 % k.chan@donders.ru.nl
@@ -15,13 +15,14 @@
 % Date modified: 25 Feb 2022 (v1.2)
 %
 %% Specify the directories of the toolbox here
-MEDI_HOME       = '/Users/pfuchs/MATLAB/Toolboxes/MEDI_toolbox';
-STISuite_HOME   = '/Users/pfuchs/MATLAB/Toolboxes/STISuite_V3.0';
-FANSI_HOME      = '/Users/pfuchs/MATLAB/Toolboxes/FANSI';
-SEGUE_HOME      = '/Users/pfuchs/MATLAB/Toolboxes/SEGUE_28012021';
-MRITOOLS_HOME   = '/opt/compileMRI/matlab';
-MRISC_HOME      = '/Users/pfuchs/MATLAB/Toolboxes/UCL-QSM';
-ANTS_HOME       = '/Users/pfuchs/software/ants/bin';
+MEDI_HOME = '/cbica/projects/pafin/projects/qsm-validation/software/MEDI';
+STISuite_HOME = '/cbica/projects/pafin/projects/qsm-validation/software/STISuite_V3.0';
+FANSI_HOME = '/cbica/projects/pafin/projects/qsm-validation/software/FANSI-toolbox-b6ac1c9ea03380722ebe25a6dbef33fff4ea3700';
+SEGUE_HOME = '/cbica/projects/pafin/projects/qsm-validation/software/SEGUE_28012021';
+MRITOOLS_HOME = '/cbica/projects/pafin/projects/qsm-validation/software/mritools';
+MRISC_HOME = '/cbica/projects/pafin/projects/qsm-validation/software/MRI_susceptibility_calculation_12072021/MATLAB';
+ANTS_HOME = '/cbica/projects/pafin/projects/qsm-validation/software/ants/bin';
+
 
 %% if you have any missing toolboxes, then specify it as empty array
 % MEDI_HOME      = [];

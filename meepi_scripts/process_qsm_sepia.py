@@ -34,9 +34,14 @@ import numpy as np
 from bids.layout import BIDSLayout, Query
 from scipy.io import loadmat, savemat
 
-from utils import get_filename, load_config
-
-CFG = load_config()
+CFG = {
+    'bids_dir': '/cbica/projects/pafin/dset',
+    'code_dir': '/cbica/projects/pafin/projects/qsm-validation/code',
+    'work_dir': '/cbica/comp_space/pafin/qsm-validation',
+    'derivatives': {
+        'meepi': '/cbica/projects/pafin/projects/qsm-validation/derivatives/meepi',
+    }
+}
 CODE_DIR = CFG['code_dir']
 
 
@@ -81,26 +86,9 @@ def collect_run_data(layout: BIDSLayout, bids_filters: dict) -> dict:
     if mag_echoes != phase_echoes:
         raise ValueError(f'Magnitude echoes {mag_echoes} do not match phase echoes {phase_echoes}')
 
-    mask_query = dict(bids_filters)
-    mask_query.pop('echo', None)
-    mask_query.pop('part', None)
-    mask_query = _drop_empty_entities(
-        {
-            **mask_query,
-            'datatype': 'func',
-            'desc': 'brain',
-            'suffix': 'mask',
-            'extension': ['.nii', '.nii.gz'],
-        }
-    )
-    mask_files = layout.get(**mask_query)
-    if len(mask_files) != 1:
-        raise ValueError(f'Expected 1 brain mask, got {len(mask_files)} with query {mask_query}')
-
     run_data = {
         'bold_mag': [f.path for f in mag_files],
         'bold_phase': [f.path for f in phase_files],
-        'mask': mask_files[0].path,
     }
     print(pformat(run_data), flush=True)
     return run_data
@@ -291,13 +279,8 @@ def write_matlab_scripts(
     script_paths = []
     chimap_files = []
     name_source = run_data['bold_mag'][0]
-    final_4d_chimap_file = get_filename(
-        name_source=name_source,
-        layout=layout,
-        out_dir=out_dir,
-        entities={'desc': 'sepia', 'suffix': 'Chimap'},
-        dismiss_entities=['echo', 'part', 'inv', 'reconstruction'],
-    )
+    base_name = os.path.basename(name_source)
+    final_4d_chimap_file = os.path.join(out_dir, base_name.split("_echo-")[0] + "_desc-sepia_Chimap.nii.gz")
     os.makedirs(os.path.dirname(final_4d_chimap_file), exist_ok=True)
 
     for volume_input in volume_inputs:
@@ -307,13 +290,8 @@ def write_matlab_scripts(
         os.makedirs(sepia_dir, exist_ok=True)
         sepia_prefix = os.path.join(sepia_dir, 'sepia')
 
-        final_chimap_file = get_filename(
-            name_source=name_source,
-            layout=layout,
-            out_dir=out_dir,
-            entities={'desc': f'{volume_label}sepia', 'suffix': 'Chimap'},
-            dismiss_entities=['echo', 'part', 'inv', 'reconstruction'],
-        )
+        base_name = os.path.basename(name_source)
+        final_chimap_file = os.path.join(out_dir, base_name.split("_echo-")[0] + f"_desc-{volume_label}sepia_Chimap.nii.gz")
         os.makedirs(os.path.dirname(final_chimap_file), exist_ok=True)
 
         modified_sepia_script = (
@@ -321,6 +299,7 @@ def write_matlab_scripts(
             .replace('{{ mag_file }}', str(volume_input['mag_file']))
             .replace('{{ output_dir }}', sepia_prefix)
             .replace('{{ header_file }}', str(volume_input['header_file']))
+            # XXX: Use mask from wk-phase-unwrap
             .replace('{{ mask_file_literal }}', _matlab_literal_path(str(run_data['mask'])))
             .replace('{{ final_chimap_file_literal }}', _matlab_literal_path(final_chimap_file))
         )
@@ -560,21 +539,15 @@ def main(
     dry_run,
 ):
     in_dir = CFG['bids_dir']
-    smriprep_dir = CFG['derivatives']['smriprep']
-    out_dir = CFG['derivatives']['qsm']
+    out_dir = CFG['derivatives']['meepi']
     os.makedirs(out_dir, exist_ok=True)
-    temp_dir = os.path.join(CFG['work_dir'], 'sepia', f'sub-{subject_id}')
+    temp_dir = os.path.join(CFG['work_dir'], 'meepi', f'sub-{subject_id}')
     os.makedirs(temp_dir, exist_ok=True)
-
-    derivatives = [smriprep_dir, out_dir]
-    if 'fmriprep' in CFG.get('derivatives', {}):
-        derivatives.append(CFG['derivatives']['fmriprep'])
 
     layout = BIDSLayout(
         in_dir,
-        config=os.path.join(CODE_DIR, 'nibs_bids_config.json'),
+        config=['bids'],
         validate=False,
-        derivatives=derivatives,
     )
 
     print(f'Processing subject {subject_id}', flush=True)
