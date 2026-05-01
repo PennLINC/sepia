@@ -27,31 +27,31 @@ action_handle = {h.qsm.NDI.edit.tol,...
                  h.qsm.NDI.edit.maxIter,...
                  h.qsm.NDI.edit.stepSize,...
                  h.qsm.NDI.checkbox.isGPU};
-           
+
 
 switch lower(mode)
     case 'set'
         fid = input;
-        
+
         for k = 1:3
             fprintf(fid,'algorParam%s = %s ;\n'	,str_pattern{k},get(action_handle{k},	'String'));
         end
-        
+
         % is GPU
         k = k+1;
         fprintf(fid,'algorParam%s = %i ;\n'             ,str_pattern{k},get(action_handle{k},	'Value'));
-        
+
     case 'get'
-        
+
         config_txt = input;
-        
+
         % first 3 edit fields
-        for k = 1:3 % PSF 2025.07.24 - bugfix, length(action_handle) = 4, not 3
+        for k = 1:3 % PSF 2025.07.24 - bugfix since length(action_handle) = 4 with the last being the GPU flag
             pattern_curr    = str_pattern{k};
             val             = get_num_as_string(config_txt, pattern_curr, '=', ';');
             set_non_nan_value(action_handle{k},'String',val)
         end
-        
+
         % isGPU
         k = k+1;
         pattern_curr    = str_pattern{k};
